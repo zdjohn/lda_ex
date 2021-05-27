@@ -1,0 +1,13 @@
+{
+    "minimum_reviews": 3,
+    "maximum_reviews": 50,
+    "s3_path": "s3a://zip-ex/",
+    "source_file": "s3a://zip-ex/source_json/exercise2.jl",
+    "spark_app_configs":{
+        "spark.app.name":"HelloSpark",
+        "spark.sql.shuffle.partitions":"5",
+        "spark.sql.execution.arrow.pyspark.enabled":"true",
+        "spark.executor.extraJavaOptions":"-Dcom.amazonaws.services.s3.enableV4=true -Dio.netty.tryReflectionSetAccessible=true",
+        "spark.driver.extraJavaOptions":"-Dcom.amazonaws.services.s3.enableV4=true -Dio.netty.tryReflectionSetAccessible=true"
+    }
+}

@@ -1,8 +1,9 @@
 {
-    "minimum_reviews": 3,
-    "maximum_reviews": 50,
-    "s3_path": "s3a://zip-ex/",
-    "source_file": "s3a://zip-ex/source_json/exercise2.jl",
+    "k": 6,
+    "iteration": 50,
+    "seed": 100,
+    "base_bucket": "s3://zip-ex/",
+    "source_file": "s3://zip-ex/source_json/exercise2.jl",
     "spark_app_configs":{
         "spark.app.name":"HelloSpark",
         "spark.sql.shuffle.partitions":"5",

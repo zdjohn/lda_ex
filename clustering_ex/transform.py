@@ -3,7 +3,7 @@ import numpy as np
 from pyspark.sql import functions as F
 from pyspark.sql import DataFrame
 from pyspark.ml import Pipeline
-from pyspark.ml.feature import IDF, StopWordsRemover, CountVectorizer, RegexTokenizer
+from pyspark.ml.feature import IDF, StopWordsRemover, CountVectorizer, RegexTokenizer, NGram
 from pyspark.ml.clustering import LDA, LocalLDAModel, LDAModel
 from clustering_ex import udf
 
@@ -92,21 +92,27 @@ def to_tf_idf_features_df(df: DataFrame) -> Tuple[list, DataFrame]:
         |-- features: vector (nullable = true)
     """
 
-    html_punctuation_re = r'<.*?>|[-\\/\\"_():;,.!?\\-\\*•\\|\\&%]|[0-9]'
+    html_punctuation_re = r'<.*?>|[-\\/\\"_():;,.!?\\-\\*•\\|\\&\\$%]|[0-9]'
 
     cleaned = df.withColumn('description', F.regexp_replace(
         'description', html_punctuation_re, ''))
 
     tokenizer = RegexTokenizer(inputCol="description", outputCol="words")
-    remover = StopWordsRemover(inputCol="words", outputCol="cleaned_words")
-    tf = CountVectorizer(inputCol="cleaned_words", outputCol="raw", minDF=3)
+    remover = StopWordsRemover(
+        inputCol="words", outputCol="cleaned_words")
+    # NOTE: optionally n_gram approach seems performs better when K value being larger
+    # n_gram = NGram(n=2, inputCol="remove_stop_words", outputCol="cleaned_words")
+    tf = CountVectorizer(inputCol="cleaned_words",
+                         outputCol="raw", maxDF=0.3, minDF=0.01)
     idf = IDF(inputCol="raw", outputCol="features")
+
+    # pipeline = Pipeline(stages=[tokenizer, remover, n_gram, tf, idf])
     pipeline = Pipeline(stages=[tokenizer, remover, tf, idf])
 
     features_pipeline = pipeline.fit(cleaned)
     feature_df = features_pipeline.transform(
         cleaned
-    ).select('product_name', 'brands', 'categories', 'cleaned_words', 'features')
+    ).select('product_name', 'brands', 'categories', 'features', 'cleaned_words')
 
     vocab = features_pipeline.stages[2].vocabulary
 
@@ -128,20 +134,35 @@ def fit_lda(df: DataFrame, k: int = 6, iter: int = 50, seed: int = 0, col: str =
         root
         |-- product_name: string (nullable = true)
         |-- brands: array (nullable = true)
-        |    |-- element: string (containsNull = false)
+        |    |-- element: string (containsNull = true)
         |-- categories: array (nullable = true)
         |    |-- element: string (containsNull = true)
+        |-- topicDistribution: vector (nullable = true)
+        |-- score: float (nullable = true)
         |-- topic: integer (nullable = true)
     """
     lda = LDA(k=k, maxIter=iter, seed=seed, featuresCol=col)
     model = lda.fit(df)
     output_df = model.transform(df).withColumn(
-        'topic', udf.get_topic(F.col('topicDistribution'))
-    ).drop('features')
+        'score_topic', udf.get_topic(F.col('topicDistribution'))
+    ).select('product_name', 'brands', 'categories', 'topicDistribution',
+             F.col('score_topic.score').alias('score'),
+             F.col('score_topic.topic').alias('topic'))
+
     return model, output_df
 
 
 def to_model_topics(model: LocalLDAModel, vocab: list, topics_num: int = 10) -> DataFrame:
+    """[summary]
+
+    Args:
+        model (LocalLDAModel): [description]
+        vocab (list): [description]
+        topics_num (int, optional): [description]. Defaults to 10.
+
+    Returns:
+        DataFrame: [description]
+    """
     topics = model.describeTopics(topics_num)
     total_vocabulary = ','.join(vocab)
     return topics.withColumn("words", udf.term_to_Word(topics.termIndices, F.lit(total_vocabulary))

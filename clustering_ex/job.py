@@ -13,8 +13,8 @@ def run(session, settings):
     # args init
     k = int(settings.get('k', 5))
     iteration = settings.get('iteration', 5)
-    versioned_output = f"output/{settings.get('version', f'{int(time.time())}')}_{k}"
     random_seed = int(settings.get('seed', 0))
+    versioned_output = f"output/{settings.get('version', f'{int(time.time())}')}_{k}{iteration}{random_seed}"
 
     # extract
     raw_df = session.read.json(settings['source_file'])

@@ -14,6 +14,6 @@ aws emr create-cluster --name "lda-k5" \
     --instance-count 3 \
     --configurations '[{"Classification":"spark-env","Configurations":[{"Classification":"export","Properties":{"PYSPARK_PYTHON":"/usr/bin/python3"}}]}]' \
     --bootstrap-action Path="s3://zip-ex/artifact/bootstrap.sh" \
-    --steps Type=Spark,Name="lda-5",ActionOnFailure=TERMINATE_CLUSTER,Args=[--deploy-mode,cluster,--master,yarn,--py-files,s3://zip-ex/artifact/dist_files.zip,--files,s3://zip-ex/artifact/settings.json,s3://zip-ex/artifact/main.py,--k=7] \
+    --steps Type=Spark,Name="lda-5",ActionOnFailure=TERMINATE_CLUSTER,Args=[--deploy-mode,cluster,--master,yarn,--py-files,s3://zip-ex/artifact/dist_files.zip,--files,s3://zip-ex/artifact/settings.json,s3://zip-ex/artifact/main.py] \
     --use-default-roles \
     --auto-terminate

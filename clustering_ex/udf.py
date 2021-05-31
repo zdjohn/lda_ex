@@ -1,7 +1,7 @@
 from itertools import chain
 import pandas as pd
 from pyspark.sql.functions import udf, pandas_udf
-from pyspark.sql.types import ArrayType, StringType, IntegerType
+from pyspark.sql.types import ArrayType, FloatType, StringType, IntegerType, StructField, StructType, DoubleType
 
 
 @pandas_udf(ArrayType(StringType()))
@@ -24,6 +24,6 @@ def term_to_Word(term_idx_col_df: pd.Series, vocabulary: pd.Series) -> pd.Series
     return pd.Series(res)
 
 
-@udf(IntegerType())
+@udf(StructType([StructField('score', FloatType()), StructField('topic', IntegerType())]))
 def get_topic(x):
-    return x.tolist().index(max(x))
+    return float(max(x)), x.tolist().index(max(x))

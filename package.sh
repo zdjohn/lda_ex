@@ -31,9 +31,3 @@ cp main.py dist/.
 cp settings.json dist/.
 cp requirements.txt dist/.
 cp bootstrap.sh dist/.
-
-# rm -rf dependencies
-
-# upload the script and package to target s3 bucket
-
-# submit to emr

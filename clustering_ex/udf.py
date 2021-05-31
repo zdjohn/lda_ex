@@ -13,7 +13,7 @@ def merge_lists(list_col_df: pd.Series) -> pd.Series:
 
 
 @pandas_udf(ArrayType(StringType()))
-def term_to_Word(term_idx_col_df: pd.Series, vocabulary: pd.Series) -> pd.Series:
+def term_to_word(term_idx_col_df: pd.Series, vocabulary: pd.Series) -> pd.Series:
     vocab = vocabulary.iloc[0].split(',')
     res = []
     for row in term_idx_col_df:

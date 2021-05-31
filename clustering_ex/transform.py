@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, List
 import numpy as np
 from pyspark.sql import functions as F
 from pyspark.sql import DataFrame
@@ -73,7 +73,7 @@ def to_item_df(df: DataFrame) -> DataFrame:
                                            ).withColumn('code_count', F.expr('size(codes)'))
 
 
-def to_tf_idf_features_df(df: DataFrame) -> Tuple[list, DataFrame]:
+def to_tf_idf_features_df(df: DataFrame) -> Tuple[List[str], DataFrame]:
     """
     clean up html markups as well as punctuation from description
     transform item description into tf-idf vectors
@@ -165,7 +165,7 @@ def to_model_topics(model: LocalLDAModel, vocab: list, topics_num: int = 10) -> 
     """
     topics = model.describeTopics(topics_num)
     total_vocabulary = ','.join(vocab)
-    return topics.withColumn("words", udf.term_to_Word(topics.termIndices, F.lit(total_vocabulary))
+    return topics.withColumn("words", udf.term_to_word(topics.termIndices, F.lit(total_vocabulary))
                              ).withColumn('top_terms', F.arrays_zip('words', 'termWeights')).select('topic', 'top_terms')
 
 

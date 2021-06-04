@@ -1,4 +1,5 @@
-from clustering_ex import utils, transform
+from clustering_ex import utils
+from clustering_ex.lda import transform
 import time
 
 

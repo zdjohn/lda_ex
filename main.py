@@ -16,8 +16,8 @@ parser.add_argument("--iteration", help="max iteration number", type=int)
 parser.add_argument("--seed", help="randomization seed value", type=int)
 
 JOBS = {
-    "lda": job_lda,
-    "node2vec": job_node2vec
+    "lda": job_lda.run,
+    "node2vec": job_node2vec.run
 }
 
 if __name__ == "__main__":
@@ -25,5 +25,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
     spark_session, logger, settings = utils.start_spark(**vars(args))
     logger.info(f'default settings: {json.dumps(settings)}')
-    job = JOBS.get(args.job, "lda")
-    job.run(spark_session, settings)
+    job_run = JOBS.get(args.job or "lda")
+    job_run(spark_session, settings)

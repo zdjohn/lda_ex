@@ -6,8 +6,8 @@ from dotenv import load_dotenv
 
 
 from clustering_ex import utils
-from clustering_ex.lda import job_lda
-from clustering_ex.node2vec import job_node2vec
+from clustering_ex.lda import job as job_lda
+from clustering_ex.node2vec import job as job_node2vec
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--job", help="pick etl job", type=str)
